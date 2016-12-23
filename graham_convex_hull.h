@@ -10,11 +10,22 @@ namespace convex_hull {
 	
 struct point
 {
-private:
-	float x_coord;
-	float y_coord;
-
 public:
+    point()
+        : x_coord(0)
+        , y_coord(0)
+    {}
+
+    point(const float x, const float y)
+        : x_coord(x)
+        , y_coord(y)
+    {}
+
+    point(const std::initializer_list<float>& il)
+        : x_coord(*il.begin())
+        , y_coord(*(il.begin() + 1))
+    {}
+
 	float x() const
 	{
 		return x_coord;
@@ -24,6 +35,9 @@ public:
 		return y_coord;
 	}
 
+private:
+	float x_coord;
+	float y_coord;
 };
 
 point nextToTop(std::stack<point> &s)
@@ -48,31 +62,28 @@ double distance(const point& p1, const point& p2)
 		+ (p1.y() - p2.y())*(p1.y() - p2.y());
 }
 
-int orientation(const point& p1, const point& p2, const point& p3)
+float orientation(const point& p1, const point& p2, const point& p3)
 {
-	double result = (p2.y() - p1.y()) * (p3.x() - p2.x()) - (p2.x() - p1.x()) * (p3.y() - p2.y());
-	/// @brief if result == 0 the point are lyng in the same line
-	if (result == 0) {
-		return 0;
-	}
-	/// @brief when result > 0 then points are lying clockwise otherwise conterclockwise
-	return (result > 0) ? 1 : 2;
+	/// @brief returns 0 if the point are lyng in the same line,
+    /// a positive value if the points are clockwise
+    /// and negative if the points are counterclockwise
+	return (p2.y() - p1.y()) * (p3.x() - p2.x()) - (p2.x() - p1.x()) * (p3.y() - p2.y());
 }
 
 point p0;
-int compare(const point& p1, const point& p2)
+bool compare(const point& p1, const point& p2)
 {
-	int orient = orientation(p0, p1, p2);
-	if (orient == 0) {
-		return (distance(p0, p2) >= distance(p0, p1)) ? -1 : 1;
-	}
-	return (orient == 2) ? -1 : 1;
+    // TODO!
+	float orient = orientation(p0, p1, p2);
+    return orient > 0 ? true :
+           orient < 0 ? false :
+           (distance(p0, p2) >= distance(p0, p1)) ? false : true;
 }
 
-void graham_scan(std::vector<point> &vec)
+std::stack<point> graham_scan(std::vector<point> vec)
 {
 	if (vec.size() < 3) {
-		return;
+		return std::stack<point>();
 	}
 	//STEP 1.
 	//first of all we need the bottomest point
@@ -92,17 +103,20 @@ void graham_scan(std::vector<point> &vec)
 	// counterclockwise direction) than p1
 	p0 = vec[0];
 	//STEP 2.
-	std::sort(vec.begin(), vec.end(), compare);
-		//STEP 3
+	std::sort(vec.begin() + 1, vec.end(), compare);
+    //STEP 3
 	std::stack<point> S;
 	S.push(vec[0]);
 	S.push(vec[1]);
 	S.push(vec[2]);
 	for (auto i = 3; i < vec.size(); i++) {
-		while ((orientation(nextToTop(S), S.top(), vec[i]) != 2) && (S.size() > 3))
-			S.pop();
+		while ((orientation(nextToTop(S), S.top(), vec[i]) < 0) &&
+               (S.size() > 3)) {
+            S.pop();
+        }
 		S.push(vec[i]);
 	}
+    return S;
 }
 
 } // namespace convex_hull
