@@ -4,15 +4,19 @@
 
 int main()
 {
-    auto result = convex_hull::graham_scan({
-            { 1.0, 2.0 },
-            { 1.0, 3.0 },
-            { 6.0, 2.0 },
-            { 4.0, 3.0 },
-            { 8.0, 8.0 },
-            { 1.0, 9.0 },
-            { 0.0, 2.0 }
-            });
+    std::vector<convex_hull::point> points;
+    for (int x = 0; x <= 10000; ++x) {
+        if (x <= 5000) {
+            for (int y = 0; y <= x; ++y) {
+                points.push_back({x, y});
+            }
+        } else {
+            for (int y = 0; y <= 10000 - x; ++y) {
+                points.push_back({x, y});
+            }
+        }
+    }
+    auto result = convex_hull::graham_scan(points);
     while (!result.empty()) {
         const auto& p = result.top();
         std::cout << p.x() << ' ' << p.y() << '\n';
