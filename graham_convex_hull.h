@@ -40,7 +40,7 @@ private:
     double y_coord;
 };
 
-point nextToTop(std::stack<point> &s)
+point next_to_top(std::stack<point> &s)
 {
     point temp = s.top();
     s.pop();
@@ -86,12 +86,12 @@ std::stack<point> graham_scan(std::vector<point> vec)
     }
     //STEP 1.
     //first of all we need the bottomest point
-    double yMin = vec[0].y();
+    double y_min = vec[0].y();
     int min = 0;
     for (auto i = 1; i < vec.size(); ++i) {
-        double yCur = vec[i].y();
-        if ((yCur < yMin) || (yMin == yCur && vec[i].x() < vec[min].x())) {
-            yMin = vec[i].y();
+        double y_cur = vec[i].y();
+        if ((y_cur < y_min) || (y_min == y_cur && vec[i].x() < vec[min].x())) {
+            y_min = vec[i].y();
             min = i;
         }
     }
@@ -104,21 +104,21 @@ std::stack<point> graham_scan(std::vector<point> vec)
     //STEP 2.
     std::sort(vec.begin() + 1, vec.end(), compare);
     //STEP 3
-    std::stack<point> S;
-    S.push(vec[0]);
-    S.push(vec[1]);
-    S.push(vec[2]);
+    std::stack<point> result;
+    result.push(vec[0]);
+    result.push(vec[1]);
+    result.push(vec[2]);
     for (auto i = 3; i < vec.size(); ++i) {
-        while ((orientation(nextToTop(S), S.top(), vec[i]) <= 0) &&
-                (S.size() > 2)) {
-            S.pop();
+        while ((orientation(next_to_top(result), result.top(), vec[i]) <= 0) &&
+                (result.size() > 2)) {
+            result.pop();
         }
-        S.push(vec[i]);
+        result.push(vec[i]);
     }
-    if (orientation(nextToTop(S), S.top(), p0) <= 0) {
-        S.pop();
+    if (orientation(next_to_top(result), result.top(), p0) <= 0) {
+        result.pop();
     }
-    return S;
+    return result;
 }
 
 } // namespace convex_hull
